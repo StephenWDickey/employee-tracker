@@ -247,7 +247,7 @@ function addEmployee() {
                 return { name: `${manager.first_name} ${manager.last_name}`, value: manager.id }
             })
 
-            let nullValue = { name: 'No manager', value: 0 };
+            let nullValue = { name: 'No manager', value: 50 };
             manager.push(nullValue);
 
             inquirer.prompt([
@@ -489,7 +489,7 @@ function updateManager() {
         // the key will be dept name, the value will be
         // the department's id
         let employees = data.map(employees => {
-            return { name: `${employees.first_name} ${employees.last_name}`, value: employees.manager_id }
+            return { name: `${employees.first_name} ${employees.last_name}`, value: employees.id }
         })
 
         db.query("SELECT * FROM managers", function (err, data) {
@@ -533,6 +533,14 @@ function updateManager() {
 
                     else if (answers.employee_choices === 100) {
                         start();
+                    }
+
+                    else if (answers.employee_choices === 50) {
+                        db.query(`UPDATE employees SET manager_id = ? WHERE id = employees.id`, [answers.manager_choices], function (err, data) {
+                            if (err) throw err;
+                            console.table(data);
+                            start();
+                        })
                     }
                     
                     else { 
