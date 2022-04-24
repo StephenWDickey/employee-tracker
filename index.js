@@ -52,7 +52,7 @@ const start = () => {
         }
 
         else if (answers.options === "Update Employee") {
-
+            updateEmployee();
         }
 
     })
@@ -201,7 +201,8 @@ function addEmployee() {
                     message: "Choose the team member that will oversee the new employee.",
                     choices: manager
                 }]).then(answers => {
-                    // the SET command allows us to enter 
+                    // the SET command allows us to enter all of our answers
+                    // into the table without writing them all out 
                     db.query("INSERT INTO employees SET ?", answers, function (err, res) {
                         if (err) throw err;
                         console.table(res);
@@ -211,9 +212,65 @@ function addEmployee() {
         })
     })
     
-}
+};
 
 
-/////////////////////////////////////////////
+////////////////////////////////////////////////////////
+
+
+function updateEmployee() {
+    // just like before we must query our db to get data first
+    // this way we can ask questions based on our data!
+    db.query("SELECT * FROM employees", function (err, data) {
+        if (err) throw err;
+        // we use map() function to apply function to each item in array
+        // and then it is making a new array
+        // we want each array item to have a name equal to the employee names
+        // but we want the values of each object to be equal to the
+        // employee id
+        let employees = data.map(employees => {
+            
+            return { name: `${employees.first_name} ${employees.last_name}`, value: employees.id}
+
+        })
+        // now we get roles table info so we can change employee role!
+        db.query("SELECT * FROM roles", function (err, data) {
+            if (err) throw err;
+
+            let roles = data.map(roles => {
+                // so now we select the title of the role
+                // but it's real value is the role_id
+                // this way our table can be updated correctly
+                return { name: roles.title, value: roles.id }
+            })
+
+            inquirer.prompt([
+                {
+                    type: "list",
+                    name: "employee_choices",
+                    message: "Select team member to update.",
+                    choices: employees
+                },
+                {
+                    type: "list",
+                    name: "new_role",
+                    message: "Change team member's position.",
+                    choices: roles
+
+                }]).then(answers => {
+                    
+
+                    // we update the employees table
+                    // we are changing the role_id for the employee_id that we chose
+                    db.query(`UPDATE employees SET role_id = ? WHERE id = ?`, [answers.new_role, answers.employee_choices], function (err, res) {
+                        if (err) throw err;
+                        console.table(res);
+                        start(); 
+                    })
+                    
+                })
+        })
+    })
+};
 
 
