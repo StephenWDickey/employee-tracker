@@ -30,12 +30,11 @@ CREATE TABLE employees (
     first_name VARCHAR(30) NOT NULL,
     last_name VARCHAR(30) NOT NULL,
     role_id INTEGER NOT NULL,
-    manager_id INTEGER NOT NULL,
+    manager_id INTEGER,
     -- we have 2 foreign keys in this table
     -- role_id references the id column of roles table
     -- manager_id references the employee id that is their manager
-    CONSTRAINT fk_employeerole FOREIGN KEY (role_id) REFERENCES roles(id),
-    CONSTRAINT fk_employeemanager FOREIGN KEY (manager_id) REFERENCES employees(id)
+    CONSTRAINT fk_employeerole FOREIGN KEY (role_id) REFERENCES roles(id)
 );
 
 
