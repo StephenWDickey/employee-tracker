@@ -283,7 +283,10 @@ function updateEmployee() {
                 // this way our table can be updated correctly
                 return { name: roles.title, value: roles.id }
             })
-
+            
+            let nullValue = { name: 'Return to main menu.', value: 0 };
+            employees.push(nullValue);
+            
             inquirer.prompt([
                 {
                     type: "list",
@@ -295,20 +298,28 @@ function updateEmployee() {
                     type: "list",
                     name: "new_role",
                     message: "Change team member's position.",
-                    choices: roles
+                    choices: roles,
+                    // we are only asking this question if user
+                    // does not select return to main menu
+                    when: (answers) => answers.employee_choices != 0
 
                 }]).then(answers => {
                     
-
+                    if (answers.employee_choices === 0) {
+                        start();
+                    }
+                        
                     // we update the employees table
                     // we are changing the role_id for the employee_id that we chose
                     // remember our answers reference the NAME OF THE PROMPT
                     // NOT the choices
-                    db.query(`UPDATE employees SET role_id = ? WHERE id = ?`, [answers.new_role, answers.employee_choices], function (err, res) {
-                        if (err) throw err;
-                        console.table(res);
-                        start(); 
-                    })
+                    else {
+                        db.query(`UPDATE employees SET role_id = ? WHERE id = ?`, [answers.new_role, answers.employee_choices], function (err, res) {
+                            if (err) throw err;
+                            console.table(res);
+                            start(); 
+                        })
+                    }
                     
                 })
         })
@@ -334,7 +345,10 @@ function viewEmployeesByManager() {
         let managers = data.map(managers => {
             return { name: `${managers.first_name} ${managers.last_name}, ${managers.title}`, value: managers.manager_id }
         })
-
+        
+        let nullValue = { name: 'Return to main menu.', value: 0 };
+        managers.push(nullValue);
+        
         inquirer.prompt([
             {
                 type: "list",
@@ -343,13 +357,21 @@ function viewEmployeesByManager() {
                 choices: managers
 
             }]).then(answers => {
-                // use AND in WHERE statement to have more than one condition
-                db.query(`SELECT employees.first_name, employees.last_name, roles.title FROM employees, roles WHERE employees.manager_id = ? AND employees.role_id = roles.id`, answers.manager_choices, function (err, res) {
 
-                    if (err) throw err;
-                    console.table(res);
+                if (answers.manager_choices === 0) {
                     start();
-                })
+                }
+                
+                    // use AND in WHERE statement to have more than one condition
+                    else{
+                        db.query(`SELECT employees.first_name, employees.last_name, roles.title FROM employees, roles WHERE employees.manager_id = ? AND employees.role_id = roles.id`, answers.manager_choices, function (err, res) {
+                    
+                            if (err) throw err;
+                            console.table(res);
+                            start();
+
+                        })
+                    }
             })
     })
 
@@ -374,6 +396,11 @@ function viewEmployeesByDept() {
         let departments = data.map(departments => {
             return { name: `${departments.name}`, value: departments.id }
         })
+
+        let nullValue = { name: 'Return to main menu.', value: 0 };
+        departments.push(nullValue);
+
+        
         inquirer.prompt([
             {
                 type: "list",
@@ -382,13 +409,20 @@ function viewEmployeesByDept() {
                 choices: departments
 
             }]).then(answers => {
-                // use AND in WHERE statement to have more than one condition
-                db.query(`SELECT employees.first_name, employees.last_name, roles.title FROM employees, roles WHERE roles.department_id = ? AND employees.role_id = roles.id`, answers.department_choices, function (err, res) {
 
-                    if (err) throw err;
-                    console.table(res);
+                if (answers.department_choices === 0) {
                     start();
-                })
+                }
+
+                // use AND in WHERE statement to have more than one condition
+                else { 
+                    db.query(`SELECT employees.first_name, employees.last_name, roles.title FROM employees, roles WHERE roles.department_id = ? AND employees.role_id = roles.id`, answers.department_choices, function (err, res) {
+
+                        if (err) throw err;
+                        console.table(res);
+                        start();
+                    })
+                }
             })
     })
 
@@ -421,6 +455,10 @@ function updateManager() {
             })
             let nullValue = { name: 'No Manager', value: null };
             managers.push(nullValue);
+
+            let nullValue2 = { name: 'Return to main menu.', value: 0 };
+            employees.push(nullValue2);
+
             inquirer.prompt([
                 {
                     type: "list",
@@ -433,7 +471,10 @@ function updateManager() {
                     type: "list",
                     name: "manager_choices",
                     message: "Select a new manager.",
-                    choices: managers
+                    choices: managers,
+                    // here we are saying we will ask this question if
+                    // the user did not select return to main menu
+                    when: (answers) => answers.employee_choices != 0
 
                 }]).then(answers => {
 
@@ -443,6 +484,10 @@ function updateManager() {
                             console.table(data);
                             start();
                         })
+                    }
+
+                    else if (answers.employee_choices === 0) {
+                        start();
                     }
                     
                     else { 
@@ -483,16 +528,19 @@ function viewDepartmentBudgets () {
 
             }]).then(answers => {
 
+                
+            
                 db.query("SELECT SUM(roles.salary) AS budget FROM roles WHERE roles.department_id = ?", answers.department_choices, function (err, res) {
                     if (err) throw err;
                     console.table(res);
                     start();
                 })
             
+            
         
         })
     })
-}
+};
 
 
 /////////////////////////////////////////////////////////////////////////
@@ -507,6 +555,9 @@ function removeDepartment () {
             return { name: departments.name, value: departments.id }
         })
 
+        let nullValue = { name: 'Return to main menu.', value: 0 };
+        departments.push(nullValue);
+
         inquirer.prompt([
             {
                 type: "list",
@@ -516,11 +567,16 @@ function removeDepartment () {
 
             }]).then(answers => {
 
-                db.query("DELETE from departments WHERE departments.id = ?", answers.department_choices, function (err, res) {
-                    if (err) throw err;
-                    console.table(res);
+                if (answers.department_choices === 0 ) {
                     start();
-                })
+                }
+                else {
+                    db.query("DELETE from departments WHERE departments.id = ?", answers.department_choices, function (err, res) {
+                        if (err) throw err;
+                        console.table(res);
+                        start();
+                    })
+                }
             
         
         })
@@ -542,6 +598,9 @@ function removeRole () {
             return { name: roles.title, value: roles.id }
         })
 
+        let nullValue = { name: 'Return to main menu.', value: 0 };
+        roles.push(nullValue);
+
         inquirer.prompt([
             {
                 type: "list",
@@ -550,12 +609,16 @@ function removeRole () {
                 choices: roles
 
             }]).then(answers => {
-
-                db.query("DELETE from roles WHERE roles.id = ?", answers.role_choices, function (err, res) {
-                    if (err) throw err;
-                    console.table(res);
+                if (answers.role_choices === 0 ) {
                     start();
-                })
+                }
+                else {
+                    db.query("DELETE from roles WHERE roles.id = ?", answers.role_choices, function (err, res) {
+                        if (err) throw err;
+                        console.table(res);
+                        start();
+                    })
+                }
             
         
         })
@@ -575,6 +638,9 @@ function removeEmployee () {
             return { name: `${employees.first_name} ${employees.last_name}`, value: employees.id }
         })
 
+        let nullValue = { name: 'Return to main menu.', value: 0 };
+        employees.push(nullValue);
+
         inquirer.prompt([
             {
                 type: "list",
@@ -583,12 +649,17 @@ function removeEmployee () {
                 choices: employees
 
             }]).then(answers => {
-
-                db.query("DELETE from employees WHERE employees.id = ?", answers.employee_choices, function (err, res) {
-                    if (err) throw err;
-                    console.table(res);
+                if (answers.employee_choices === 0) {
                     start();
-                })
+                }
+
+                else {
+                    db.query("DELETE from employees WHERE employees.id = ?", answers.employee_choices, function (err, res) {
+                        if (err) throw err;
+                        console.table(res);
+                        start();
+                    })
+                }
             
         
         })
