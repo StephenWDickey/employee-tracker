@@ -218,36 +218,51 @@ function addEmployee() {
             let manager = data.map(manager => {
                 return { name: `${manager.first_name} ${manager.last_name}`, value: manager.id }
             })
+
+            
+
             inquirer.prompt([
                 {   
                     type: "input",
                     name: "first_name",
-                    message: "Enter employee's first name."
+                    message: "Enter employee's first name. Enter nothing to return to main menu."
                 },
                 {
                     type: "input",
                     name: "last_name",
-                    message: "Enter employee's last name."
+                    message: "Enter employee's last name.",
+                    when: (answers) => answers.first_name != ""
                 },
                 {
                     type: "list",
                     name: "role_id",
                     message: "Choose new employee's position.",
-                    choices: role
+                    choices: role,
+                    when: (answers) => answers.first_name != ""
                 },
                 {
                     type: "list",
                     name: "manager_id",
                     message: "Choose the team member that will oversee the new employee.",
-                    choices: manager
+                    choices: manager,
+                    when: (answers) => answers.first_name != ""
+
                 }]).then(answers => {
-                    // the SET command allows us to enter all of our answers
-                    // into the table without writing them all out 
-                    db.query("INSERT INTO employees SET ?", answers, function (err, res) {
-                        if (err) throw err;
-                        console.table(res);
+
+                    if (answers.first_name === "") {
                         start();
-                    })
+                    }
+                    
+                    
+                    else {
+                        // the SET command allows us to enter all of our answers
+                        // into the table without writing them all out 
+                        db.query("INSERT INTO employees SET ?", answers, function (err, res) {
+                            if (err) throw err;
+                            console.table(res);
+                            start();
+                        })
+                    }
                 })
         })
     })
@@ -453,6 +468,7 @@ function updateManager() {
             let managers = data.map(managers => {
                 return { name: `${managers.first_name} ${managers.last_name}, ${managers.title}`, value: managers.manager_id}
             })
+
             let nullValue = { name: 'No Manager', value: null };
             managers.push(nullValue);
 
@@ -519,6 +535,9 @@ function viewDepartmentBudgets () {
             return { name: departments.name, value: departments.id }
         })
 
+        let nullValue = { name: 'Return to main menu.', value: 0 };
+        departments.push(nullValue);
+        
         inquirer.prompt([
             {
                 type: "list",
@@ -528,13 +547,17 @@ function viewDepartmentBudgets () {
 
             }]).then(answers => {
 
-                
-            
-                db.query("SELECT SUM(roles.salary) AS budget FROM roles WHERE roles.department_id = ?", answers.department_choices, function (err, res) {
-                    if (err) throw err;
-                    console.table(res);
+                if (answers.department_choices === 0) {
                     start();
-                })
+                }
+            
+                else {
+                    db.query("SELECT SUM(roles.salary) AS budget FROM roles WHERE roles.department_id = ?", answers.department_choices, function (err, res) {
+                        if (err) throw err;
+                        console.table(res);
+                        start();
+                    })
+                }
             
             
         
