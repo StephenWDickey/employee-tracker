@@ -78,7 +78,7 @@ const start = () => {
         }
 
         else if (answers.options === "Remove a Position") {
-            updateManager();
+            removeRole();
         }
 
         else if (answers.options === "Remove a Team Member") {
@@ -517,6 +517,41 @@ function removeDepartment () {
             }]).then(answers => {
 
                 db.query("DELETE from departments WHERE departments.id = ?", answers.department_choices, function (err, res) {
+                    if (err) throw err;
+                    console.table(res);
+                    start();
+                })
+            
+        
+        })
+    })
+};
+
+
+
+///////////////////////////////////////////////////////////////////////////
+
+
+
+function removeRole () {
+    db.query("SELECT * FROM roles", function (err, data) {
+        if (err) throw err;
+
+        let roles = data.map(roles => {
+            
+            return { name: roles.title, value: roles.id }
+        })
+
+        inquirer.prompt([
+            {
+                type: "list",
+                name: "role_choices",
+                message: "Select a position to remove.",
+                choices: roles
+
+            }]).then(answers => {
+
+                db.query("DELETE from roles WHERE roles.id = ?", answers.role_choices, function (err, res) {
                     if (err) throw err;
                     console.table(res);
                     start();
