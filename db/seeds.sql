@@ -28,3 +28,11 @@ VALUES
     ('Ashley', 'Rodriguez', 6, NULL),
     ('Tom', 'Allen', 7, 8),
     ('Sarah', 'Lourd', 8, NULL);
+
+
+INSERT INTO managers (first_name, last_name, role_id, title, manager_id)
+VALUES
+    ('John', 'Doe', 2, 'Sales Lead', 2),
+    ('Kunal', 'Singh', 4, 'Account Manager', 4),
+    ('Ashley', 'Rodriguez', 6, 'Lead Engineer', 6),
+    ('Sarah', 'Lourd', 8, 'Legal Team Lead', 8);

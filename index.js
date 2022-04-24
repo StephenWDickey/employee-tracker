@@ -19,7 +19,7 @@ const start = () => {
             type: "list",
             name: "options",
             message: "Please select an option.",
-            choices: ["View All Departments", "View All Roles", "View All Employees", "Add Department", "Add Role", "Add Employee", "Update Employee", "Exit"],
+            choices: ["View All Departments", "View Department Budgets", "View All Roles", "View All Employees", "View Team Members By Manager", "View Team Members By Department", "Add Department", "Add Role", "Add Employee", "Update Employee", "Update Manager", "Exit"],
         }
     ]).then(answers => {
 
@@ -31,12 +31,26 @@ const start = () => {
             viewAllDepartments();
         }
 
+        else if (answers.options === "View Department Budgets") {
+            viewDepartmentBudgets();
+        }
+
         else if (answers.options === "View All Roles") {
             viewAllRoles();
         }
 
         else if (answers.options === "View All Employees") {
             viewAllEmployees();
+        }
+
+        else if (answers.options === "View Team Members By Manager") {
+
+            viewEmployeesByManager();
+        }
+
+        else if (answers.options === "View Team Members By Department") {
+
+            viewEmployeesByDept();
         }
 
         else if ( answers.options === "Add Department") {
@@ -53,6 +67,10 @@ const start = () => {
 
         else if (answers.options === "Update Employee") {
             updateEmployee();
+        }
+
+        else if (answers.options === "Update Manager") {
+            updateManager();
         }
 
     })
@@ -114,13 +132,18 @@ function addDepartment() {
         {
             type: "input",
             name: "new_department",
-            message: "Enter new department name."
+            message: "Enter new department name. Enter nothing to return to main menu."
         }).then(answers => {
-            db.query("INSERT INTO departments (name) VALUES (?)", [answers.new_department], function (err, res) {
-                if (err) throw err;
-                console.table(res);
+            if (answers.new_department === '') {
                 start();
-        })
+            }
+            else {
+                db.query("INSERT INTO departments (name) VALUES (?)", [answers.new_department], function (err, res) {
+                    if (err) throw err;
+                    console.table(res);
+                    start();
+                })
+            }
     })
 };
 
@@ -134,13 +157,18 @@ function addRole() {
         {
             type: "input",
             name: "new_role",
-            message: "Enter a new position."
+            message: "Enter a new position. Enter nothing to return to main menu."
         }).then(answers => {
-            db.query("INSERT INTO roles (title) VALUES (?)", [answers.new_role], function (err, res) {
-                if (err) throw err;
-                console.table(res);
-                start();
-        })
+            if (answers.new_role === "") {
+                start();    
+            }
+            else{
+                db.query("INSERT INTO roles (title) VALUES (?)", [answers.new_role], function (err, res) {
+                    if (err) throw err;
+                    console.table(res);
+                    start();
+                })
+            }
     })
 };
 
@@ -262,6 +290,8 @@ function updateEmployee() {
 
                     // we update the employees table
                     // we are changing the role_id for the employee_id that we chose
+                    // remember our answers reference the NAME OF THE PROMPT
+                    // NOT the choices
                     db.query(`UPDATE employees SET role_id = ? WHERE id = ?`, [answers.new_role, answers.employee_choices], function (err, res) {
                         if (err) throw err;
                         console.table(res);
@@ -274,3 +304,180 @@ function updateEmployee() {
 };
 
 
+
+//////////////////////////////////////////////////////////////
+
+
+function viewEmployeesByManager() {
+
+    db.query("SELECT * FROM managers", function (err, data) {
+
+        if (err) throw err;
+
+        // the map() function will generate a new array
+        // each item in the array will have this function acted on it
+        // in this case, each item in the array will be an object
+        // the key will be first and last name, the value will be
+        // the manager's id
+        let managers = data.map(managers => {
+            return { name: `${managers.first_name} ${managers.last_name}, ${managers.title}`, value: managers.manager_id }
+        })
+
+        inquirer.prompt([
+            {
+                type: "list",
+                name: "manager_choices",
+                message: "Select manager to view team.",
+                choices: managers
+
+            }]).then(answers => {
+                // use AND in WHERE statement to have more than one condition
+                db.query(`SELECT employees.first_name, employees.last_name, roles.title FROM employees, roles WHERE employees.manager_id = ? AND employees.role_id = roles.id`, answers.manager_choices, function (err, res) {
+
+                    if (err) throw err;
+                    console.table(res);
+                    start();
+                })
+            })
+    })
+
+}; 
+
+
+
+////////////////////////////////////////////////////////////////////////
+
+
+function viewEmployeesByDept() {
+
+    db.query("SELECT * FROM departments", function (err, data) {
+
+        if (err) throw err;
+
+        // the map() function will generate a new array
+        // each item in the array will have this function acted on it
+        // in this case, each item in the array will be an object
+        // the key will be dept name, the value will be
+        // the department's id
+        let departments = data.map(departments => {
+            return { name: `${departments.name}`, value: departments.id }
+        })
+        inquirer.prompt([
+            {
+                type: "list",
+                name: "department_choices",
+                message: "Select a department to view team.",
+                choices: departments
+
+            }]).then(answers => {
+                // use AND in WHERE statement to have more than one condition
+                db.query(`SELECT employees.first_name, employees.last_name, roles.title FROM employees, roles WHERE roles.department_id = ? AND employees.role_id = roles.id`, answers.department_choices, function (err, res) {
+
+                    if (err) throw err;
+                    console.table(res);
+                    start();
+                })
+            })
+    })
+
+}; 
+
+
+
+//////////////////////////////////////////////////////////
+
+
+function updateManager() {
+
+    db.query("SELECT * FROM employees", function (err, data) {
+
+        if (err) throw err;
+
+        // the map() function will generate a new array
+        // each item in the array will have this function acted on it
+        // in this case, each item in the array will be an object
+        // the key will be dept name, the value will be
+        // the department's id
+        let employees = data.map(employees => {
+            return { name: `${employees.first_name} ${employees.last_name}`, value: employees.manager_id }
+        })
+
+        db.query("SELECT * FROM managers", function (err, data) {
+            
+            let managers = data.map(managers => {
+                return { name: `${managers.first_name} ${managers.last_name}, ${managers.title}`, value: managers.manager_id}
+            })
+            let nullValue = { name: 'No Manager', value: null };
+            managers.push(nullValue);
+            inquirer.prompt([
+                {
+                    type: "list",
+                    name: "employee_choices",
+                    message: "Update supervisor for which team member?.",
+                    choices: employees
+
+                },
+                {
+                    type: "list",
+                    name: "manager_choices",
+                    message: "Select a new manager.",
+                    choices: managers
+
+                }]).then(answers => {
+
+                    if (answers.employee_choices === "No manager") {
+                        db.query(`UPDATE employees SET manager_id = ?`, null, function (err, data) {
+                            if (err) throw err;
+                            console.table(data);
+                            start();
+                        })
+                    }
+                    
+                    else { 
+                        // use AND in WHERE statement to have more than one condition
+                        db.query(`UPDATE employees SET manager_id = ? WHERE id = ?`, [answers.manager_choices, answers.employee_choices], function (err, res) {
+
+                            if (err) throw err;
+                            console.table(res);
+                            start();
+                        })
+                    }
+                })
+            })        
+    })  
+
+}; 
+
+
+
+//////////////////////////////////////////////////////////////
+
+
+function viewDepartmentBudgets () {
+    db.query("SELECT * FROM departments", function (err, data) {
+        if (err) throw err;
+
+        let departments = data.map(departments => {
+            
+            return { name: departments.name, value: departments.id }
+        })
+
+        inquirer.prompt([
+            {
+                type: "list",
+                name: "department_choices",
+                message: "Select department to view budget.",
+                choices: departments
+
+            }]).then(answers => {
+
+                db.query("SELECT SUM(roles.salary) AS budget FROM roles WHERE roles.department_id = ?", answers.department_choices, function (err, res) {
+                    if (err) throw err;
+                    console.table(res);
+                    start();
+                })
+            
+        
+        })
+    })
+}

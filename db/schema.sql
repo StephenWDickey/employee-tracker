@@ -2,9 +2,11 @@
 -- then we create a new table with correct info
 
 -- employees table must come first because it relies on all the other tables
+DROP TABLE IF EXISTS managers;
 DROP TABLE IF EXISTS employees;
 DROP TABLE IF EXISTS roles;
 DROP TABLE IF EXISTS departments;
+
 
 
 
@@ -25,7 +27,9 @@ CREATE TABLE roles (
     -- REFERENCES refers to the table it is referencing, with column in ()
     -- so we get id from departments table for dept_id
     CONSTRAINT fk_roles FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE SET NULL
+    
 );
+
 
 
 CREATE TABLE employees (
@@ -39,6 +43,24 @@ CREATE TABLE employees (
     
     
 );
+
+
+CREATE TABLE managers (
+    id INTEGER AUTO_INCREMENT PRIMARY KEY,
+    first_name VARCHAR(30) NOT NULL,
+    last_name VARCHAR(30) NOT NULL,
+    role_id INTEGER NOT NULL,
+    title VARCHAR(30) NOT NULL,
+    manager_id INTEGER NOT NULL,
+
+    CONSTRAINT fk_managerRole FOREIGN KEY (role_id) REFERENCES roles(id),
+    CONSTRAINT fk_managerId FOREIGN KEY (manager_id) REFERENCES employees(id)
+    
+    
+);
+
+
+
 
 
 
