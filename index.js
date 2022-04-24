@@ -82,7 +82,7 @@ const start = () => {
         }
 
         else if (answers.options === "Remove a Team Member") {
-            updateManager();
+            removeEmployee();
         }
 
     })
@@ -560,4 +560,37 @@ function removeRole () {
         
         })
     })
-}
+};
+
+
+//////////////////////////////////////////////////////////////////////////////////
+
+
+function removeEmployee () {
+    db.query("SELECT * FROM employees", function (err, data) {
+        if (err) throw err;
+
+        let employees = data.map(employees => {
+            
+            return { name: `${employees.first_name} ${employees.last_name}`, value: employees.id }
+        })
+
+        inquirer.prompt([
+            {
+                type: "list",
+                name: "employee_choices",
+                message: "Select a team member to remove from database.",
+                choices: employees
+
+            }]).then(answers => {
+
+                db.query("DELETE from employees WHERE employees.id = ?", answers.employee_choices, function (err, res) {
+                    if (err) throw err;
+                    console.table(res);
+                    start();
+                })
+            
+        
+        })
+    })
+};
