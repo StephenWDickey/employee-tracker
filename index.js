@@ -165,22 +165,50 @@ function addDepartment() {
 
 
 function addRole() {
-    inquirer.prompt(
-        {
-            type: "input",
-            name: "new_role",
-            message: "Enter a new position. Enter nothing to return to main menu."
-        }).then(answers => {
-            if (answers.new_role === "") {
-                start();    
-            }
-            else{
-                db.query("INSERT INTO roles (title) VALUES (?)", [answers.new_role], function (err, res) {
-                    if (err) throw err;
-                    console.table(res);
-                    start();
+    
+    db.query("SELECT * FROM departments", function (err, data) {
+        
+        if (err) throw err;
+
+        let departments = data.map(departments => {
+
+            return { name : departments.name, value: departments.id };
+        })
+    
+
+        inquirer.prompt([
+            {
+                type: "input",
+                name: "new_role",
+                message: "Enter a new position. Enter nothing to return to main menu."
+
+            },
+            {
+                type: "input",
+                name: "salary",
+                message: "Enter salary for this position.",
+                when: (answers) => answers.new_role !== ""
+            },
+            {
+                type: "list",
+                name: "dept_choices",
+                message: "Which department does this position fall under?",
+                choices: departments,
+                when: (answers) => answers.new_role !== ""
+
+            }]).then(answers => {
+                if (answers.new_role === "") {
+                    start();    
+                }
+
+                else {
+                    db.query("INSERT INTO roles (title, salary, department_id) VALUES (?, ?, ?)", [answers.new_role, answers.salary, answers.dept_choices], function (err, res) {
+                        if (err) throw err;
+                        console.table(res);
+                        start();
                 })
             }
+        })
     })
 };
 
@@ -219,7 +247,8 @@ function addEmployee() {
                 return { name: `${manager.first_name} ${manager.last_name}`, value: manager.id }
             })
 
-            
+            let nullValue = { name: 'No manager', value: 0 };
+            manager.push(nullValue);
 
             inquirer.prompt([
                 {   
