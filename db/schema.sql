@@ -12,6 +12,15 @@ CREATE TABLE departments (
     name VARCHAR(50) NOT NULL
 );
 
+CREATE TABLE employees (
+    id INTEGER AUTO_INCREMENT PRIMARY KEY,
+    first_name VARCHAR(30) NOT NULL,
+    last_name VARCHAR(30) NOT NULL,
+    role_id INTEGER NOT NULL,
+    manager_id INTEGER
+    
+);
+
 CREATE TABLE roles (
     id INTEGER AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(30) NOT NULL,
@@ -25,17 +34,7 @@ CREATE TABLE roles (
     CONSTRAINT fk_roles FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE SET NULL
 );
 
-CREATE TABLE employees (
-    id INTEGER AUTO_INCREMENT PRIMARY KEY,
-    first_name VARCHAR(30) NOT NULL,
-    last_name VARCHAR(30) NOT NULL,
-    role_id INTEGER NOT NULL,
-    manager_id INTEGER,
-    -- we have 2 foreign keys in this table
-    -- role_id references the id column of roles table
-    -- manager_id references the employee id that is their manager
-    CONSTRAINT fk_employeerole FOREIGN KEY (role_id) REFERENCES roles(id)
-);
+
 
 
 

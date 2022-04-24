@@ -1,6 +1,7 @@
 // we must import mysql2 module to connect to MySQL database
 const mysql = require('mysql2');
 
+
 ////////////////////////////////////////////////////
 
 
@@ -20,7 +21,8 @@ const db = mysql.createConnection (
 
     },
 
-    console.log('Connected to the employee database.')
+    console.log('Connected to the employee database.'),
+
     
 );
 
