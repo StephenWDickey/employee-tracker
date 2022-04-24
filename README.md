@@ -1,5 +1,7 @@
 # employee-tracker
 
+![Video of application](./assets/challenge-12-video.webm)
+
 ## Description 
 
 In this week's challenge we were tasked with using Node.js, Inquirer, and MySQL to create a professional content management system (CMS) for managing employees, departments, and positions.
