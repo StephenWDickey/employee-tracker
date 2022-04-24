@@ -19,7 +19,7 @@ const start = () => {
             type: "list",
             name: "options",
             message: "Please select an option.",
-            choices: ["View All Departments", "View Department Budgets", "View All Roles", "View All Employees", "View Team Members By Manager", "View Team Members By Department", "Add Department", "Add Role", "Add Employee", "Update Employee", "Update Manager", "Exit"],
+            choices: ["View All Departments", "View Department Budgets", "View All Roles", "View All Employees", "View Team Members By Manager", "View Team Members By Department", "Add Department", "Add Role", "Add Employee", "Update Employee", "Update Manager", "Remove a Department", "Remove a Position", "Remove a Team Member", "Exit"],
         }
     ]).then(answers => {
 
@@ -70,6 +70,18 @@ const start = () => {
         }
 
         else if (answers.options === "Update Manager") {
+            updateManager();
+        }
+
+        else if (answers.options === "Remove a Department") {
+            removeDepartment();
+        }
+
+        else if (answers.options === "Remove a Position") {
+            updateManager();
+        }
+
+        else if (answers.options === "Remove a Team Member") {
             updateManager();
         }
 
@@ -472,6 +484,39 @@ function viewDepartmentBudgets () {
             }]).then(answers => {
 
                 db.query("SELECT SUM(roles.salary) AS budget FROM roles WHERE roles.department_id = ?", answers.department_choices, function (err, res) {
+                    if (err) throw err;
+                    console.table(res);
+                    start();
+                })
+            
+        
+        })
+    })
+}
+
+
+/////////////////////////////////////////////////////////////////////////
+
+
+function removeDepartment () {
+    db.query("SELECT * FROM departments", function (err, data) {
+        if (err) throw err;
+
+        let departments = data.map(departments => {
+            
+            return { name: departments.name, value: departments.id }
+        })
+
+        inquirer.prompt([
+            {
+                type: "list",
+                name: "department_choices",
+                message: "Select department to remove.",
+                choices: departments
+
+            }]).then(answers => {
+
+                db.query("DELETE from departments WHERE departments.id = ?", answers.department_choices, function (err, res) {
                     if (err) throw err;
                     console.table(res);
                     start();
