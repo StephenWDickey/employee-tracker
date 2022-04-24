@@ -328,7 +328,7 @@ function updateEmployee() {
                 return { name: roles.title, value: roles.id }
             })
             
-            let nullValue = { name: 'Return to main menu.', value: 0 };
+            let nullValue = { name: 'Return to main menu.', value: 100 };
             employees.push(nullValue);
             
             inquirer.prompt([
@@ -345,11 +345,11 @@ function updateEmployee() {
                     choices: roles,
                     // we are only asking this question if user
                     // does not select return to main menu
-                    when: (answers) => answers.employee_choices != 0
+                    when: (answers) => answers.employee_choices != 100
 
                 }]).then(answers => {
                     
-                    if (answers.employee_choices === 0) {
+                    if (answers.employee_choices === 100) {
                         start();
                     }
                         
@@ -390,7 +390,7 @@ function viewEmployeesByManager() {
             return { name: `${managers.first_name} ${managers.last_name}, ${managers.title}`, value: managers.manager_id }
         })
         
-        let nullValue = { name: 'Return to main menu.', value: 0 };
+        let nullValue = { name: 'Return to main menu.', value: 100 };
         managers.push(nullValue);
         
         inquirer.prompt([
@@ -402,20 +402,20 @@ function viewEmployeesByManager() {
 
             }]).then(answers => {
 
-                if (answers.manager_choices === 0) {
+                if (answers.manager_choices === 100) {
                     start();
                 }
                 
-                    // use AND in WHERE statement to have more than one condition
-                    else{
-                        db.query(`SELECT employees.first_name, employees.last_name, roles.title FROM employees, roles WHERE employees.manager_id = ? AND employees.role_id = roles.id`, answers.manager_choices, function (err, res) {
+                // use AND in WHERE statement to have more than one condition
+                else{
+                    db.query(`SELECT employees.first_name, employees.last_name, roles.title FROM employees, roles WHERE employees.manager_id = ? AND employees.role_id = roles.id`, answers.manager_choices, function (err, res) {
                     
-                            if (err) throw err;
-                            console.table(res);
-                            start();
+                        if (err) throw err;
+                        console.table(res);
+                        start();
 
-                        })
-                    }
+                    })
+                }
             })
     })
 
@@ -441,7 +441,7 @@ function viewEmployeesByDept() {
             return { name: `${departments.name}`, value: departments.id }
         })
 
-        let nullValue = { name: 'Return to main menu.', value: 0 };
+        let nullValue = { name: 'Return to main menu.', value: 100 };
         departments.push(nullValue);
 
         
@@ -454,7 +454,7 @@ function viewEmployeesByDept() {
 
             }]).then(answers => {
 
-                if (answers.department_choices === 0) {
+                if (answers.department_choices === 100) {
                     start();
                 }
 
@@ -501,7 +501,7 @@ function updateManager() {
             let nullValue = { name: 'No Manager', value: null };
             managers.push(nullValue);
 
-            let nullValue2 = { name: 'Return to main menu.', value: 0 };
+            let nullValue2 = { name: 'Return to main menu.', value: 100 };
             employees.push(nullValue2);
 
             inquirer.prompt([
@@ -519,11 +519,11 @@ function updateManager() {
                     choices: managers,
                     // here we are saying we will ask this question if
                     // the user did not select return to main menu
-                    when: (answers) => answers.employee_choices != 0
+                    when: (answers) => answers.employee_choices != 100
 
                 }]).then(answers => {
 
-                    if (answers.employee_choices === "No manager") {
+                    if (answers.manager_choices === "No Manager") {
                         db.query(`UPDATE employees SET manager_id = ?`, null, function (err, data) {
                             if (err) throw err;
                             console.table(data);
@@ -531,7 +531,7 @@ function updateManager() {
                         })
                     }
 
-                    else if (answers.employee_choices === 0) {
+                    else if (answers.employee_choices === 100) {
                         start();
                     }
                     
@@ -564,7 +564,7 @@ function viewDepartmentBudgets () {
             return { name: departments.name, value: departments.id }
         })
 
-        let nullValue = { name: 'Return to main menu.', value: 0 };
+        let nullValue = { name: 'Return to main menu.', value: 100 };
         departments.push(nullValue);
         
         inquirer.prompt([
@@ -576,7 +576,7 @@ function viewDepartmentBudgets () {
 
             }]).then(answers => {
 
-                if (answers.department_choices === 0) {
+                if (answers.department_choices === 100) {
                     start();
                 }
             
@@ -607,7 +607,7 @@ function removeDepartment () {
             return { name: departments.name, value: departments.id }
         })
 
-        let nullValue = { name: 'Return to main menu.', value: 0 };
+        let nullValue = { name: 'Return to main menu.', value: 100 };
         departments.push(nullValue);
 
         inquirer.prompt([
@@ -619,7 +619,7 @@ function removeDepartment () {
 
             }]).then(answers => {
 
-                if (answers.department_choices === 0 ) {
+                if (answers.department_choices === 100 ) {
                     start();
                 }
                 else {
@@ -650,7 +650,7 @@ function removeRole () {
             return { name: roles.title, value: roles.id }
         })
 
-        let nullValue = { name: 'Return to main menu.', value: 0 };
+        let nullValue = { name: 'Return to main menu.', value: 100 };
         roles.push(nullValue);
 
         inquirer.prompt([
@@ -661,7 +661,7 @@ function removeRole () {
                 choices: roles
 
             }]).then(answers => {
-                if (answers.role_choices === 0 ) {
+                if (answers.role_choices === 100 ) {
                     start();
                 }
                 else {
@@ -690,7 +690,7 @@ function removeEmployee () {
             return { name: `${employees.first_name} ${employees.last_name}`, value: employees.id }
         })
 
-        let nullValue = { name: 'Return to main menu.', value: 0 };
+        let nullValue = { name: 'Return to main menu.', value: 100 };
         employees.push(nullValue);
 
         inquirer.prompt([
@@ -701,7 +701,7 @@ function removeEmployee () {
                 choices: employees
 
             }]).then(answers => {
-                if (answers.employee_choices === 0) {
+                if (answers.employee_choices === 100) {
                     start();
                 }
 
